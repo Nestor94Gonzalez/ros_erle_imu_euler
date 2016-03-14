@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>ros_erle_imu</name>
+  <name>ros_erle_imu_euler</name>
   <version>0.0.0</version>
-  <description>The ros_erle_imu package</description>
+  <description>The ros_erle_imu_euler package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->

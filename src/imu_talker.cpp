@@ -7,11 +7,9 @@
 #include <sys/time.h>
 #include "MPU9250.h"
 #include "AHRS.hpp"
-
+#include "ros_erle_imu_euler/euler.h"
 #include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/Temperature.h>
-#include <sensor_msgs/MagneticField.h>
+
 // Objects
 
 MPU9250 imu;    // MPU9250
@@ -68,13 +66,11 @@ int main(int argc, char *argv[])
     //-------------------- IMU setup and main loop ----------------------------
     imuSetup();
 
-    ros::init(argc, argv, "imu_talker");
+    ros::init(argc, argv, "ros_erle_imu_euler");
     
     ros::NodeHandle n;
 
-    ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("imu9250", 1000);
-    ros::Publisher temperature_pub = n.advertise<sensor_msgs::Temperature>("temperature9250", 1000);
-    ros::Publisher magnetic_field_pub = n.advertise<sensor_msgs::MagneticField>("magneticField9250", 1000);
+    ros::Publisher imu_euler_pub = n.advertise<ros_erle_imu_euler::euler>("euler", 1000);
 
     ros::Rate loop_rate(50);
 
@@ -101,70 +97,11 @@ int main(int argc, char *argv[])
 
         ahrs.getEuler(&roll, &pitch, &yaw);
 
-        sensor_msgs::Imu msg;
-        msg.linear_acceleration.x = ax;
-        msg.linear_acceleration.y = ay;
-        msg.linear_acceleration.z = az;
-
-        msg.linear_acceleration_covariance[0] = 0.04;
-        msg.linear_acceleration_covariance[1] = 0;
-        msg.linear_acceleration_covariance[2] = 0;
-
-        msg.linear_acceleration_covariance[3] = 0;
-        msg.linear_acceleration_covariance[4] = 0.04;
-        msg.linear_acceleration_covariance[5] = 0;
-
-        msg.linear_acceleration_covariance[6] = 0;
-        msg.linear_acceleration_covariance[7] = 0;
-        msg.linear_acceleration_covariance[8] = 0.04;
-
-
-        msg.angular_velocity.x = gx;
-        msg.angular_velocity.y = gy;
-        msg.angular_velocity.z = gz;
-
-
-        msg.angular_velocity_covariance[0] = 0.02;
-        msg.angular_velocity_covariance[1] = 0;
-        msg.angular_velocity_covariance[2] = 0;
-
-        msg.angular_velocity_covariance[3] = 0;
-        msg.angular_velocity_covariance[4] = 0.02;
-        msg.angular_velocity_covariance[5] = 0;
-
-        msg.angular_velocity_covariance[6] = 0;
-        msg.angular_velocity_covariance[7] = 0;
-        msg.angular_velocity_covariance[8] = 0.02;
-
-        msg.orientation.w = ahrs.getW();
-        msg.orientation.x = ahrs.getX();
-        msg.orientation.y = ahrs.getY();
-        msg.orientation.z = ahrs.getZ();
-
-        msg.orientation_covariance[0] = 0.0025;
-        msg.orientation_covariance[1] = 0;
-        msg.orientation_covariance[2] = 0;
-
-        msg.orientation_covariance[3] = 0;
-        msg.orientation_covariance[4] = 0.0025;
-        msg.orientation_covariance[5] = 0;
-
-        msg.orientation_covariance[6] = 0;
-        msg.orientation_covariance[7] = 0;
-        msg.orientation_covariance[8] = 0.0025;
-
-        imu_pub.publish(msg);
-
-        sensor_msgs::Temperature temperature_msg;
-        temperature_msg.temperature = imu.temperature;
-        temperature_msg.variance = 0;
-        temperature_pub.publish(temperature_msg);
-
-        sensor_msgs::MagneticField magnetic_field_msg;
-        magnetic_field_msg.magnetic_field.x = mx;
-        magnetic_field_msg.magnetic_field.y = my;
-        magnetic_field_msg.magnetic_field.z = mz;
-        magnetic_field_pub.publish(magnetic_field_msg);
+        ros_erle_imu_euler::euler msg;
+        msg.roll = roll;
+        msg.pitch = pitch;
+        msg.yaw = yaw;
+        imu_euler_pub.publish(msg);
 
         ros::spinOnce();
         loop_rate.sleep();
